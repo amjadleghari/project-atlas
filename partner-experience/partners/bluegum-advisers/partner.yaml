@@ -1,0 +1,15 @@
+name: Bluegum Advisers
+summary: Financial advice network quoting annuities for clients through its adviser platform.
+status: onboarding
+owner: "@example-org/partner-integrations"
+contacts:
+  - name: Tom Whitfield
+    role: Partner manager
+    email: tom.whitfield@example.internal
+versions:
+  - version: v2
+    master: v2
+    status: current
+    released: 2026-10-01
+    overlays:
+      - overlays/v2.overlay.yaml

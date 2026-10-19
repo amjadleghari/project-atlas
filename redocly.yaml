@@ -10,6 +10,10 @@ apis:
     root: ./openapi/payments/openapi.json
   checkout-workflow:
     root: ./arazzo/checkout.arazzo.yaml
+  partner-experience@v1:
+    root: ./partner-experience/master/v1/openapi.yaml
+  partner-experience@v2:
+    root: ./partner-experience/master/v2/openapi.yaml
 
 rules:
   # Internal-only servers, so example.internal hosts are expected.

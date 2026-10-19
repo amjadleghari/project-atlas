@@ -95,3 +95,12 @@
 [data-theme='dark'] .badgeCdm {
   color: #b3abf2;
 }
+
+.badgePartner {
+  background: rgba(235, 104, 52, 0.14);
+  color: #b4471c;
+}
+
+[data-theme='dark'] .badgePartner {
+  color: #f4a27f;
+}

@@ -1,5 +1,5 @@
 {
-  "name": "api-portal",
+  "name": "partner-atlas",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,10 @@
     "typecheck": "tsc",
     "lint": "REDOCLY_TELEMETRY=off redocly lint",
     "validate:cdm": "node scripts/validate-cdm.mjs cdm https://schemas.example.internal/cdm/",
-    "check": "npm run validate:cdm && npm run lint && npm run typecheck"
+    "check": "npm run validate:cdm && npm run partners:check && npm run lint && npm run lint:partners && npm run typecheck",
+    "partners": "node scripts/partners.mjs build",
+    "partners:check": "node scripts/partners.mjs check",
+    "lint:partners": "REDOCLY_TELEMETRY=off redocly lint partner-experience/generated/*/*/openapi.yaml"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.2",
@@ -43,6 +46,7 @@
     "@types/react": "^19.0.0",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "openapi-format": "^1.34.0",
     "typescript": "~6.0.2"
   },
   "browserslist": {

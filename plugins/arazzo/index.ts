@@ -20,6 +20,8 @@ export type ArazzoPluginOptions = {
   routeBasePath: string;
   /** OpenAPI specs rendered by Redocusaurus, so steps can link to them. */
   openapiSpecs: { spec: string; route: string; label: string }[];
+  /** Absolute folder served at /contracts — JSON and YAML downloads are written here. */
+  downloadsDir?: string;
 };
 
 type OpIndexEntry = { method: string; path: string; summary?: string; operationId?: string };
@@ -351,6 +353,16 @@ export default function arazzoPlugin(
       }
       const docs = await Promise.all(files.map((f) => loadDoc(context.siteDir, dir, f, options)));
       for (const d of docs) for (const e of d.errors) console.warn(`[arazzo] ${d.file}: ${e}`);
+      if (options.downloadsDir) {
+        const out = path.join(options.downloadsDir, 'arazzo');
+        await fs.mkdir(out, { recursive: true });
+        for (const d of docs) {
+          const parsed = d.fileName.endsWith('.json') ? JSON.parse(d.raw) : YAML.parse(d.raw);
+          await fs.writeFile(path.join(out, `${d.slug}.arazzo.yaml`), d.fileName.endsWith('.json') ? YAML.stringify(parsed) : d.raw);
+          await fs.writeFile(path.join(out, `${d.slug}.arazzo.json`), JSON.stringify(parsed, null, 2) + '\n');
+          (d as any).downloads = { yaml: `/contracts/arazzo/${d.slug}.arazzo.yaml`, json: `/contracts/arazzo/${d.slug}.arazzo.json` };
+        }
+      }
       return { docs };
     },
 

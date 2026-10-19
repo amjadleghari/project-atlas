@@ -1,0 +1,28 @@
+# Partner metadata — drives the generated contracts, the partner pages and CODEOWNERS.
+name: Northwind Super
+summary: Superannuation fund offering our lifetime annuities to members at retirement.
+status: active            # onboarding | active | sunset
+owner: "@example-org/partner-integrations"   # GitHub team that reviews this folder
+contacts:
+  - name: Priya Raman
+    role: Partner manager
+    email: priya.raman@example.internal
+  - name: Northwind integration team
+    role: Partner technical contact
+    email: api-team@northwind.example.com
+versions:
+  - version: v2
+    master: v2
+    status: current       # current | deprecated | retired
+    released: 2026-08-04
+    overlays:
+      - overlays/common.overlay.yaml
+      - overlays/v2.overlay.yaml
+  - version: v1
+    master: v1
+    status: deprecated
+    released: 2025-11-17
+    sunset: 2027-03-31
+    overlays:
+      - overlays/common.overlay.yaml
+      - overlays/v1.overlay.yaml

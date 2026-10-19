@@ -1,0 +1,22 @@
+overlay: 1.0.0
+info:
+  title: Northwind Super — v1
+  version: 1.0.0
+actions:
+  - target: $.info
+    update:
+      description: |
+        Annuity quotes, policies and income schedules for Northwind Super members.
+
+        **v1 is deprecated** and will be switched off on 31 March 2027. Please move to v2.
+  - target: $
+    update:
+      servers:
+        - url: https://northwind.partners.api.example.com/experience/v1
+          description: Production
+        - url: https://northwind.sandbox.partners.api.example.com/experience/v1
+          description: Sandbox
+  - target: $.paths.*[?(@.operationId)]
+    description: Flag every v1 operation as deprecated
+    update:
+      deprecated: true

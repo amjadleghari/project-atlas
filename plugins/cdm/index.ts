@@ -277,6 +277,9 @@ export default function cdmPlugin(context: LoadContext, pluginOptions: unknown):
       return [...new Set(direct.flatMap((d) => [d, ...includes(d, seenIds)]))];
     };
 
+    const idBySchemaId = new Map<string, string>();
+    for (const m of models.values()) if (m.schemaId) idBySchemaId.set(m.schemaId, m.id);
+
     for (const spec of options.openapiSpecs) {
       const specAbs = path.resolve(context.siteDir, spec.spec);
       let doc: any;
@@ -295,9 +298,12 @@ export default function cdmPlugin(context: LoadContext, pluginOptions: unknown):
           .reduce((n: any, k) => n?.[k], doc);
 
       // Collect CDM model ids reachable from a node, following local #/ refs.
+      // Bundled contracts (e.g. generated partner contracts) no longer $ref the
+      // CDM files, but each inlined schema keeps its $id — match on that too.
       const collect = (node: any, out: Set<string>, visited: Set<string>) => {
         if (Array.isArray(node)) return node.forEach((n) => collect(n, out, visited));
         if (!node || typeof node !== 'object') return;
+        if (typeof node.$id === 'string' && idBySchemaId.has(node.$id)) out.add(idBySchemaId.get(node.$id)!);
         if (typeof node.$ref === 'string') {
           const ref: string = node.$ref;
           if (ref.startsWith('#/')) {

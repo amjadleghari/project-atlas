@@ -1,0 +1,42 @@
+overlay: 1.0.0
+info:
+  title: Bluegum Advisers — v2
+  version: 1.0.0
+actions:
+  - target: $.info
+    update:
+      title: Partner Experience API — Bluegum Advisers
+      x-partner: bluegum-advisers
+      description: |
+        Quotes and policies for clients of Bluegum's advice network. Every call is
+        made on behalf of a licensed adviser, identified by `X-Adviser-Id`.
+      contact:
+        name: Partner Support
+        email: partner-support@example.com
+  - target: $.servers
+    remove: true
+  - target: $
+    update:
+      servers:
+        - url: https://bluegum.partners.api.example.com/experience/v2
+          description: Production
+  - target: $.webhooks
+    description: Bluegum polls instead of receiving webhooks
+    remove: true
+  - target: $.components.schemas.PolicyStatusEvent
+    remove: true
+  - target: $.components.parameters
+    update:
+      AdviserId:
+        name: X-Adviser-Id
+        in: header
+        required: true
+        description: Licensed adviser making the request (AFSL authorised representative number).
+        schema:
+          type: string
+          pattern: '^\d{6,7}$'
+  - target: $.paths.*[?(@.operationId)]
+    description: Every operation needs the adviser header
+    update:
+      parameters:
+        - $ref: '#/components/parameters/AdviserId'

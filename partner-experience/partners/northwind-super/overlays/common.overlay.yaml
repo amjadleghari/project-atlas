@@ -1,0 +1,23 @@
+# Applied to every Northwind version first, then the version-specific overlay.
+overlay: 1.0.0
+info:
+  title: Northwind Super — common
+  version: 1.0.0
+actions:
+  - target: $.info
+    description: Partner-facing title and contact
+    update:
+      title: Partner Experience API — Northwind Super
+      x-partner: northwind-super
+      contact:
+        name: Partner Support
+        email: partner-support@example.com
+  - target: $.servers
+    description: Replace master gateway with Northwind's dedicated gateway (set per version below)
+    remove: true
+  - target: $.components.schemas.QuoteRequest.properties.productType.enum
+    description: Northwind's members can only buy lifetime products
+    remove: true
+  - target: $.components.schemas.QuoteRequest.properties.productType
+    update:
+      enum: [LIFETIME, DEFERRED_LIFETIME]

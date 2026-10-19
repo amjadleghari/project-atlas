@@ -52,3 +52,9 @@ export const cdm = {
   /** Every schema's $id must equal this + its path under cdm/ (checked by `npm run validate:cdm`). */
   schemaBaseUri: 'https://schemas.example.internal/cdm/',
 };
+
+/** Site identity — change the name here and it updates the title, navbar, home page and footer. */
+export const site = {
+  name: 'Partner Atlas',
+  tagline: 'Contracts, workflows, data model and partner documentation — generated from the repository.',
+};

@@ -5,6 +5,7 @@ import Heading from '@theme/Heading';
 import CodeBlock from '@theme/CodeBlock';
 import Mermaid from '@theme/Mermaid';
 import { Prose, Expr, MethodBadge } from './shared';
+import { DownloadButtons } from '@site/src/components/portal/shared';
 import styles from './styles.module.css';
 
 type Props = { doc: any };
@@ -116,7 +117,6 @@ function StepTarget({ target }: { target: any }) {
 }
 
 export default function ArazzoDocPage({ doc }: Props): ReactNode {
-  const download = `data:application/yaml;charset=utf-8,${encodeURIComponent(doc.raw)}`;
   return (
     <Layout title={`${doc.title} · Workflows`} description={doc.summary ?? undefined}>
       <main className={`container margin-vert--lg ${styles.page}`}>
@@ -129,9 +129,7 @@ export default function ArazzoDocPage({ doc }: Props): ReactNode {
             {doc.version && <span className={styles.pill}>v{doc.version}</span>}
             <span className={styles.pill}>Arazzo {doc.arazzo}</span>
             <code className={styles.muted}>{doc.file}</code>
-            <a className="button button--sm button--secondary" href={download} download={doc.fileName}>
-              Download YAML
-            </a>
+            {doc.downloads && <DownloadButtons spec={{ id: `${doc.slug}.arazzo`, downloads: doc.downloads }} compact />}
           </div>
           {doc.summary && <p className={styles.lead}>{doc.summary}</p>}
           {doc.description && <Prose text={doc.description} />}
