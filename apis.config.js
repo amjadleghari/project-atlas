@@ -41,6 +41,6 @@ exports.cdm = {
 };
 /** Site identity — change the name here and it updates the title, navbar, home page and footer. */
 exports.site = {
-    name: 'Partner Atlas',
+    name: 'Project Atlas',
     tagline: 'Contracts, workflows, data model and partner documentation — generated from the repository.'
 };
