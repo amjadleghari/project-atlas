@@ -1,0 +1,275 @@
+openapi: 3.1.0
+info:
+  title: Orders API
+  version: 1.2.0
+  summary: Create and track customer orders.
+  description: >-
+    Internal contract for the Orders service.
+
+
+    Owned by **Team Commerce** · Slack `#team-commerce`
+
+
+    Payload schemas come from the [canonical data
+    model](../data-model?model=Order).
+  contact:
+    name: Team Commerce
+    email: commerce@example.internal
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: https://orders.api.example.internal/v1
+    description: Production
+  - url: https://orders.api.staging.example.internal/v1
+    description: Staging
+security:
+  - oauth2:
+      - orders:read
+tags:
+  - name: Orders
+    description: Order lifecycle operations.
+paths:
+  /orders:
+    post:
+      tags:
+        - Orders
+      operationId: createOrder
+      summary: Create an order
+      security:
+        - oauth2:
+            - orders:write
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewOrder'
+      responses:
+        '201':
+          description: Order created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order.schema'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+  /orders/{orderId}:
+    parameters:
+      - name: orderId
+        in: path
+        required: true
+        description: Order identifier.
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Orders
+      operationId: getOrder
+      summary: Get an order
+      responses:
+        '200':
+          description: The order.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order.schema'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.example.internal/oauth2/token
+          scopes:
+            orders:read: Read orders
+            orders:write: Create orders
+  schemas:
+    Order:
+      $ref: '#/components/schemas/order.schema'
+    NewOrder:
+      type: object
+      description: Request to create an order. Built from canonical LineItem.
+      required:
+        - customerId
+        - items
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/line-item.schema'
+        shippingAddress:
+          $ref: '#/components/schemas/address.schema'
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+    money.schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: https://schemas.example.internal/cdm/core/money.schema.json
+      title: Money
+      description: >-
+        A monetary amount in a specific currency. Amounts are decimal strings to
+        avoid floating-point rounding.
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: string
+          pattern: ^-?\d+(\.\d{1,4})?$
+          description: Decimal amount.
+          examples:
+            - '49.90'
+        currency:
+          type: string
+          pattern: ^[A-Z]{3}$
+          description: ISO 4217 currency code.
+          examples:
+            - AUD
+    line-item.schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: https://schemas.example.internal/cdm/commerce/line-item.schema.json
+      title: LineItem
+      description: >-
+        One product and quantity within an order. A value object: it has no
+        identity of its own.
+      type: object
+      required:
+        - sku
+        - quantity
+      properties:
+        sku:
+          type: string
+          x-references: product.schema.json
+          description: SKU of the product ordered.
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          $ref: '#/components/schemas/money.schema'
+          description: Price at the time of ordering.
+    address.schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: https://schemas.example.internal/cdm/core/address.schema.json
+      title: Address
+      description: A postal address.
+      type: object
+      required:
+        - lines
+        - locality
+        - country
+      properties:
+        lines:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 3
+          description: Street lines.
+        locality:
+          type: string
+          description: Suburb, town or city.
+        region:
+          type: string
+          description: State or territory.
+          examples:
+            - NSW
+        postcode:
+          type: string
+          examples:
+            - '2000'
+        country:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: ISO 3166-1 alpha-2 country code.
+          examples:
+            - AU
+    entity.schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: https://schemas.example.internal/cdm/core/entity.schema.json
+      title: Entity
+      description: >-
+        Base for every identifiable business object. Supplies identity and audit
+        timestamps.
+      x-abstract: true
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Immutable, globally unique identifier.
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When the record was created (UTC).
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When the record was last changed (UTC).
+    order.schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: https://schemas.example.internal/cdm/commerce/order.schema.json
+      title: Order
+      description: A customer's request to buy one or more products.
+      allOf:
+        - $ref: '#/components/schemas/entity.schema'
+      type: object
+      required:
+        - customerId
+        - status
+        - items
+        - total
+      properties:
+        customerId:
+          type: string
+          format: uuid
+          x-references: ../party/customer.schema.json
+          description: The customer who placed the order.
+        status:
+          type: string
+          enum:
+            - PENDING_PAYMENT
+            - PAID
+            - CANCELLED
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/line-item.schema'
+        total:
+          $ref: '#/components/schemas/money.schema'
+        shippingAddress:
+          $ref: '#/components/schemas/address.schema'
+  responses:
+    Problem:
+      description: Error in RFC 9457 problem-details format.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
