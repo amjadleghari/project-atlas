@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/party/customer.schema.json",
+  "title": "Customer",
+  "description": "A person who buys from us. Adds loyalty and delivery details to Person.",
+  "allOf": [
+    {
+      "$ref": "person.schema.json"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "customerNumber"
+  ],
+  "properties": {
+    "customerNumber": {
+      "type": "string",
+      "pattern": "^C\\d{8}$",
+      "examples": [
+        "C00012345"
+      ]
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "STANDARD",
+        "SILVER",
+        "GOLD"
+      ],
+      "default": "STANDARD"
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "$ref": "../core/address.schema.json"
+      },
+      "description": "Saved delivery addresses."
+    }
+  }
+}

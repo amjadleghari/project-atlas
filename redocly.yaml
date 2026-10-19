@@ -1,0 +1,18 @@
+# Redocly CLI config — used by `npm run lint` and in CI.
+# Every contract you add should get an entry here so it is linted and bundled.
+extends:
+  - recommended
+
+apis:
+  orders@v1:
+    root: ./openapi/orders/openapi.json
+  payments@v2:
+    root: ./openapi/payments/openapi.json
+  checkout-workflow:
+    root: ./arazzo/checkout.arazzo.yaml
+
+rules:
+  # Internal-only servers, so example.internal hosts are expected.
+  no-server-example.com: off
+  # Arazzo rules (Redocly CLI validates Arazzo 1.0.x natively).
+  struct: error

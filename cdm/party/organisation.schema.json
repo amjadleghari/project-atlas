@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/party/organisation.schema.json",
+  "title": "Organisation",
+  "description": "A company, government body or other legal entity.",
+  "allOf": [
+    {
+      "$ref": "party.schema.json"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "legalName"
+  ],
+  "properties": {
+    "legalName": {
+      "type": "string"
+    },
+    "abn": {
+      "type": "string",
+      "pattern": "^\\d{11}$",
+      "description": "Australian Business Number."
+    }
+  }
+}

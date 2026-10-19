@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/core/address.schema.json",
+  "title": "Address",
+  "description": "A postal address.",
+  "type": "object",
+  "required": [
+    "lines",
+    "locality",
+    "country"
+  ],
+  "properties": {
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "maxItems": 3,
+      "description": "Street lines."
+    },
+    "locality": {
+      "type": "string",
+      "description": "Suburb, town or city."
+    },
+    "region": {
+      "type": "string",
+      "description": "State or territory.",
+      "examples": [
+        "NSW"
+      ]
+    },
+    "postcode": {
+      "type": "string",
+      "examples": [
+        "2000"
+      ]
+    },
+    "country": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "ISO 3166-1 alpha-2 country code.",
+      "examples": [
+        "AU"
+      ]
+    }
+  }
+}

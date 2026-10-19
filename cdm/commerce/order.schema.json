@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/commerce/order.schema.json",
+  "title": "Order",
+  "description": "A customer's request to buy one or more products.",
+  "allOf": [
+    {
+      "$ref": "../core/entity.schema.json"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "customerId",
+    "status",
+    "items",
+    "total"
+  ],
+  "properties": {
+    "customerId": {
+      "type": "string",
+      "format": "uuid",
+      "x-references": "../party/customer.schema.json",
+      "description": "The customer who placed the order."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING_PAYMENT",
+        "PAID",
+        "CANCELLED"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "line-item.schema.json"
+      }
+    },
+    "total": {
+      "$ref": "../core/money.schema.json"
+    },
+    "shippingAddress": {
+      "$ref": "../core/address.schema.json"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/commerce/line-item.schema.json",
+  "title": "LineItem",
+  "description": "One product and quantity within an order. A value object: it has no identity of its own.",
+  "type": "object",
+  "required": [
+    "sku",
+    "quantity"
+  ],
+  "properties": {
+    "sku": {
+      "type": "string",
+      "x-references": "product.schema.json",
+      "description": "SKU of the product ordered."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "unitPrice": {
+      "$ref": "../core/money.schema.json",
+      "description": "Price at the time of ordering."
+    }
+  }
+}

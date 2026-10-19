@@ -1,0 +1,75 @@
+name: API portal
+
+env:
+  # Keep Redocly CLI from sending usage telemetry off-network.
+  REDOCLY_TELEMETRY: "off"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege: Pages deploy uses OIDC (id-token) — no PATs or secrets needed.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; never cancel a deploy that is already running.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    # Swap for your self-hosted / larger runner label if your enterprise requires it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Validate canonical data model (JSON Schema)
+        run: npm run validate:cdm
+
+      - name: Lint OpenAPI + Arazzo contracts
+        run: npm run lint
+
+      # Gives us the real site origin and base path, which differ between
+      # private sites (https://<random>.pages.github.io/) and public ones
+      # (https://<org>.github.io/<repo>/).
+      - name: Configure Pages
+        id: pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Build site
+        run: npm run build
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin || 'http://localhost:3000' }}
+          BASE_URL: ${{ steps.pages.outputs.base_path || '/' }}
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: build
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

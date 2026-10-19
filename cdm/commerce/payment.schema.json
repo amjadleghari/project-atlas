@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/commerce/payment.schema.json",
+  "title": "Payment",
+  "description": "Money taken against an order. Concrete payments are card or bank transfer.",
+  "x-abstract": true,
+  "allOf": [
+    {
+      "$ref": "../core/entity.schema.json"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "orderId",
+    "amount",
+    "status",
+    "method"
+  ],
+  "properties": {
+    "orderId": {
+      "type": "string",
+      "format": "uuid",
+      "x-references": "order.schema.json"
+    },
+    "amount": {
+      "$ref": "../core/money.schema.json"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "AUTHORISED",
+        "CAPTURED",
+        "DECLINED"
+      ]
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "card",
+        "bank_transfer"
+      ],
+      "description": "Discriminator for the concrete payment type."
+    }
+  }
+}

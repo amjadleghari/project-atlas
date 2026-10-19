@@ -1,0 +1,99 @@
+arazzo: 1.0.1
+info:
+  title: Checkout
+  version: 1.0.0
+  summary: Place an order and pay for it across the Orders and Payments APIs.
+  description: |
+    The happy path every storefront follows: create the order, authorise a
+    payment for its total, then capture that payment.
+sourceDescriptions:
+  - name: ordersApi
+    url: ../openapi/orders/openapi.json
+    type: openapi
+  - name: paymentsApi
+    url: ../openapi/payments/openapi.json
+    type: openapi
+workflows:
+  - workflowId: placeAndPayOrder
+    summary: Create an order, then authorise and capture payment.
+    description: Fails fast if the payment is declined.
+    inputs:
+      type: object
+      required: [customerId, items]
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              sku:
+                type: string
+              quantity:
+                type: integer
+    steps:
+      - stepId: createOrder
+        description: Create the order in PENDING_PAYMENT state.
+        operationId: $sourceDescriptions.ordersApi.createOrder
+        requestBody:
+          contentType: application/json
+          payload:
+            customerId: $inputs.customerId
+            items: $inputs.items
+        successCriteria:
+          - condition: $statusCode == 201
+        outputs:
+          orderId: $response.body#/id
+          amount: $response.body#/total/amount
+          currency: $response.body#/total/currency
+
+      - stepId: authorisePayment
+        description: Authorise a payment for the order total.
+        operationId: $sourceDescriptions.paymentsApi.createPayment
+        requestBody:
+          contentType: application/json
+          payload:
+            orderId: $steps.createOrder.outputs.orderId
+            amount: $steps.createOrder.outputs.amount
+            currency: $steps.createOrder.outputs.currency
+        successCriteria:
+          - condition: $statusCode == 201
+          - context: $response.body
+            condition: $.status == 'AUTHORISED'
+            type: jsonpath
+        onFailure:
+          - name: paymentDeclined
+            type: end
+        outputs:
+          paymentId: $response.body#/id
+
+      - stepId: capturePayment
+        description: Capture the authorised payment.
+        operationId: $sourceDescriptions.paymentsApi.capturePayment
+        parameters:
+          - name: paymentId
+            in: path
+            value: $steps.authorisePayment.outputs.paymentId
+        successCriteria:
+          - condition: $statusCode == 200
+
+      - stepId: confirmOrder
+        description: Re-read the order to confirm it is PAID.
+        operationId: $sourceDescriptions.ordersApi.getOrder
+        parameters:
+          - name: orderId
+            in: path
+            value: $steps.createOrder.outputs.orderId
+        successCriteria:
+          - condition: $statusCode == 200
+          - context: $response.body
+            condition: $.status == 'PAID'
+            type: jsonpath
+        outputs:
+          status: $response.body#/status
+    outputs:
+      orderId: $steps.createOrder.outputs.orderId
+      paymentId: $steps.authorisePayment.outputs.paymentId
+      status: $steps.confirmOrder.outputs.status

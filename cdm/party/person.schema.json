@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/party/person.schema.json",
+  "title": "Person",
+  "description": "An individual human party.",
+  "allOf": [
+    {
+      "$ref": "party.schema.json"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "givenName",
+    "familyName"
+  ],
+  "properties": {
+    "givenName": {
+      "type": "string"
+    },
+    "familyName": {
+      "type": "string"
+    },
+    "dateOfBirth": {
+      "type": "string",
+      "format": "date",
+      "x-classification": "PII"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/commerce/product.schema.json",
+  "title": "Product",
+  "description": "Something we sell.",
+  "allOf": [
+    {
+      "$ref": "../core/entity.schema.json"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "sku",
+    "name",
+    "unitPrice"
+  ],
+  "properties": {
+    "sku": {
+      "type": "string",
+      "examples": [
+        "SKU-12345"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "unitPrice": {
+      "$ref": "../core/money.schema.json"
+    }
+  }
+}

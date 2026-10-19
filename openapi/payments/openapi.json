@@ -1,0 +1,170 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Payments API",
+    "version": "2.0.0",
+    "summary": "Take payments against orders.",
+    "description": "Internal contract for the Payments service.\n\nOwned by **Team Payments** \u00b7 Slack `#team-payments`\n\nPayload schemas come from the [canonical data model](../data-model?model=Payment).",
+    "contact": {
+      "name": "Team Payments",
+      "email": "payments@example.internal"
+    },
+    "license": {
+      "name": "Proprietary",
+      "identifier": "LicenseRef-Proprietary"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://payments.api.example.internal/v2",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "oauth2": [
+        "payments:write"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Payments",
+      "description": "Payment authorisation and capture."
+    }
+  ],
+  "paths": {
+    "/payments": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "createPayment",
+        "summary": "Create a payment for an order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewPayment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "401": {
+            "description": "Unauthorised."
+          }
+        }
+      }
+    },
+    "/payments/{paymentId}/capture": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "capturePayment",
+        "summary": "Capture an authorised payment",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment captured.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorised."
+          },
+          "409": {
+            "description": "Payment is not in an authorised state."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://auth.example.internal/oauth2/token",
+            "scopes": {
+              "payments:write": "Create and capture payments"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "NewPayment": {
+        "type": "object",
+        "required": [
+          "orderId",
+          "amount",
+          "method"
+        ],
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "$ref": "../../cdm/core/money.schema.json"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "card",
+              "bank_transfer"
+            ]
+          }
+        }
+      },
+      "Payment": {
+        "oneOf": [
+          {
+            "$ref": "../../cdm/commerce/card-payment.schema.json"
+          },
+          {
+            "$ref": "../../cdm/commerce/bank-transfer-payment.schema.json"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "method",
+          "mapping": {
+            "card": "../../cdm/commerce/card-payment.schema.json",
+            "bank_transfer": "../../cdm/commerce/bank-transfer-payment.schema.json"
+          }
+        }
+      }
+    }
+  }
+}

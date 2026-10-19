@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/party/party.schema.json",
+  "title": "Party",
+  "description": "Anyone the business deals with: a person or an organisation.",
+  "x-abstract": true,
+  "allOf": [
+    {
+      "$ref": "../core/entity.schema.json"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "partyType",
+    "displayName"
+  ],
+  "properties": {
+    "partyType": {
+      "type": "string",
+      "enum": [
+        "PERSON",
+        "ORGANISATION"
+      ],
+      "description": "Discriminator for the concrete party type."
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Name to show in UIs and correspondence."
+    },
+    "contactEmail": {
+      "type": "string",
+      "format": "email"
+    }
+  }
+}

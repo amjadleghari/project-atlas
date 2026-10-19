@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.internal/cdm/core/entity.schema.json",
+  "title": "Entity",
+  "description": "Base for every identifiable business object. Supplies identity and audit timestamps.",
+  "x-abstract": true,
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Immutable, globally unique identifier.",
+      "readOnly": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true,
+      "description": "When the record was created (UTC)."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true,
+      "description": "When the record was last changed (UTC)."
+    }
+  }
+}

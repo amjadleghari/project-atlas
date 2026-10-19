@@ -1,0 +1,200 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Orders API",
+    "version": "1.2.0",
+    "summary": "Create and track customer orders.",
+    "description": "Internal contract for the Orders service.\n\nOwned by **Team Commerce** \u00b7 Slack `#team-commerce`\n\nPayload schemas come from the [canonical data model](../data-model?model=Order).",
+    "contact": {
+      "name": "Team Commerce",
+      "email": "commerce@example.internal"
+    },
+    "license": {
+      "name": "Proprietary",
+      "identifier": "LicenseRef-Proprietary"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://orders.api.example.internal/v1",
+      "description": "Production"
+    },
+    {
+      "url": "https://orders.api.staging.example.internal/v1",
+      "description": "Staging"
+    }
+  ],
+  "security": [
+    {
+      "oauth2": [
+        "orders:read"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Orders",
+      "description": "Order lifecycle operations."
+    }
+  ],
+  "paths": {
+    "/orders": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "operationId": "createOrder",
+        "summary": "Create an order",
+        "security": [
+          {
+            "oauth2": [
+              "orders:write"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewOrder"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/orders/{orderId}": {
+      "parameters": [
+        {
+          "name": "orderId",
+          "in": "path",
+          "required": true,
+          "description": "Order identifier.",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "operationId": "getOrder",
+        "summary": "Get an order",
+        "responses": {
+          "200": {
+            "description": "The order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://auth.example.internal/oauth2/token",
+            "scopes": {
+              "orders:read": "Read orders",
+              "orders:write": "Create orders"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Order": {
+        "$ref": "../../cdm/commerce/order.schema.json"
+      },
+      "NewOrder": {
+        "type": "object",
+        "description": "Request to create an order. Built from canonical LineItem.",
+        "required": [
+          "customerId",
+          "items"
+        ],
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "../../cdm/commerce/line-item.schema.json"
+            }
+          },
+          "shippingAddress": {
+            "$ref": "../../cdm/core/address.schema.json"
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "responses": {
+      "Problem": {
+        "description": "Error in RFC 9457 problem-details format.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      }
+    }
+  }
+}
