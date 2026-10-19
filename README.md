@@ -1,4 +1,4 @@
-# API Portal
+# Project Atlas
 
 Internal developer portal built with **Docusaurus 3**, rendering:
 
