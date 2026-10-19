@@ -201,7 +201,7 @@ const config: Config = {
           position: 'left',
           items: [...platformSpecs, ...masterSpecs].map((s) => ({ label: s.label, to: s.route })),
         },
-        { to: '/partners', label: 'Partners', position: 'left' },
+        { to: '/partners', label: 'Projects', position: 'left' },
         { to: arazzo.routeBasePath, label: 'Workflows', position: 'left' },
         { to: cdm.routeBasePath, label: 'Data model', position: 'left' },
       ],
